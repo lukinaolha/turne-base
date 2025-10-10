@@ -1,5 +1,6 @@
 ﻿#include "Map.h"
 #include "hero.h"
+#include "enemy.h"
 #include <cstdlib>
 #include <ctime>
 
@@ -8,9 +9,15 @@ Map::Map(int w, int h) : width(w), height(h) {
     srand((unsigned)time(0));
 }
 
-void Map::generate() {
+void Map::generate(int heroX, int heroY, int enemyX, int enemyY) {
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
+
+            if ((x == heroX && y == heroY) || (x == enemyX && y == enemyY)) {
+                grid[y][x] = Cell('.', true, "floor");
+                continue;
+            }
+
             if (rand() % 10 == 0)
                 grid[y][x] = Cell('#', false, "wall");
             else
