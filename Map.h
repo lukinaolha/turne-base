@@ -21,7 +21,7 @@ private:
 
 public:
     Map(int w = 10, int h = 10);
-    void generate();                                    
+    void generate(int heroX, int heroY, int enemyX, int enemyY);
     void show(int heroX, int heroY, int enemyX, int enemyY) const; 
     bool canEnter(int x, int y) const;                   
     bool isInside(int x, int y) const;
