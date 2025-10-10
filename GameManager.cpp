@@ -1,20 +1,43 @@
 #include "GameManager.h"
 #include <iostream>
 #include <conio.h>
+#include <cstdlib>
+#include <ctime>
 using namespace std;
 
 GameManager::GameManager(int width, int height)
-    : map(width, height),
+    : map(width, height),      
     gameOver(false) {
+    srand((unsigned)time(0)); 
 }
 
 void GameManager::init() {
     cout << "Initializing game...\n";
-    map.generate(hero.getX(), hero.getY(), enemy.getX(), enemy.getY());
+
+    map.generate(0, 0, 0, 0);
+
+    int hx, hy;
+    do {
+        hx = rand() % 10;
+        hy = rand() % 10;
+    } while (!map.canEnter(hx, hy));
+
+    int ex, ey;
+    do {
+        ex = rand() % 10;
+        ey = rand() % 10;
+    } while ((!map.canEnter(ex, ey)) || (ex == hx && ey == hy));
+
+    map.generate(hx, hy, ex, ey);
+
+    hero = Hero("Player", 5, 1, hx, hy);
+    enemy = Enemy("Goblin", ex, ey);
+
+    _getch();
 }
 
 void GameManager::render() {
-    system("cls");  
+    system("cls");
     map.show(hero.getX(), hero.getY(), enemy.getX(), enemy.getY());
     cout << "\n";
     hero.drawStatus();
@@ -31,14 +54,13 @@ void GameManager::update() {
 
     bool moved = hero.move(input, map);
 
-    if (input == ' ' || input == '\r') { 
-
+    if (input == ' ' || input == '\r') {
         int dx = abs(hero.getX() - enemy.getX());
         int dy = abs(hero.getY() - enemy.getY());
         if (dx <= 1 && dy <= 1 && enemy.isAlive()) {
             cout << "\nHero attacks enemy!\n";
             enemy.takeDamage();
-            _getch(); 
+            _getch();
         }
     }
 
@@ -46,6 +68,7 @@ void GameManager::update() {
         cout << "\nEnemy defeated! You win!\n";
         gameOver = true;
     }
+
 }
 
 bool GameManager::isRunning() const {
