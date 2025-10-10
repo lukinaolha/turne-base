@@ -1,4 +1,5 @@
 ﻿#include "Map.h"
+#include "hero.h"
 #include <cstdlib>
 #include <ctime>
 
