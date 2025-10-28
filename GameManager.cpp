@@ -1,4 +1,4 @@
-#include "GameManager.h"
+﻿#include "GameManager.h"
 #include "Move.h"
 #include <iostream>
 #include <conio.h>
@@ -35,6 +35,9 @@ void GameManager::init() {
     map.generate(hx, hy, ex, ey);
 
     hero = new Hero("Player", 5, 1, hx, hy);
+    
+    hero->setMap(&map);
+
     enemy = new Enemy("Goblin", ex, ey);
 
     (void)_getch();
@@ -79,7 +82,7 @@ void GameManager::update() {
         cout << "\nEnemy defeated! You win!\n";
         gameOver = true;
     }
-}
+}   
 
 bool GameManager::isRunning() const {
     return !gameOver;
