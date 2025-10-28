@@ -2,12 +2,13 @@
 #include "Map.h"
 #include "hero.h"
 #include "enemy.h"
+using namespace std;
 
 class GameManager {
 private:
     Map map;
     Hero* hero;
-    Enemy* enemy;
+    vector<Enemy*> enemies;  
     bool gameOver;
 
 public:
