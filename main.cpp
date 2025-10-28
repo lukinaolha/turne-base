@@ -5,8 +5,8 @@ int main() {
     game.init();
 
     while (game.isRunning()) {
-        game.render();  
-        game.update(); 
+        game.render();
+        game.update();
     }
 
     cout << "\nGame Over!\n";
