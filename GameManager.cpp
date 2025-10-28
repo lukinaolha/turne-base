@@ -1,4 +1,5 @@
 #include "GameManager.h"
+#include "Move.h"
 #include <iostream>
 #include <conio.h>
 #include <cstdlib>
@@ -6,9 +7,12 @@
 using namespace std;
 
 GameManager::GameManager(int width, int height)
-    : map(width, height),      
-    gameOver(false) {
-    srand((unsigned)time(0)); 
+    : map(width, height),
+    hero(nullptr),
+    enemy(nullptr),
+    gameOver(false)
+{
+    srand((unsigned)time(0));
 }
 
 void GameManager::init() {
@@ -30,45 +34,51 @@ void GameManager::init() {
 
     map.generate(hx, hy, ex, ey);
 
-    hero = Hero("Player", 5, 1, hx, hy);
-    enemy = Enemy("Goblin", ex, ey);
+    hero = new Hero("Player", 5, 1, hx, hy);
+    enemy = new Enemy("Goblin", ex, ey);
 
-    _getch();
+    (void)_getch();
 }
 
 void GameManager::render() {
     system("cls");
-    map.show(hero.getX(), hero.getY(), enemy.getX(), enemy.getY());
+    map.show(hero->getX(), hero->getY(), enemy->getX(), enemy->getY());
     cout << "\n";
-    hero.drawStatus();
+    hero->drawStatus();
     cout << "\n(Use W/A/S/D to move, SPACE to attack, Q to quit)\n";
 }
 
 void GameManager::update() {
     char input = _getch();
 
-    if (toupper(input) == 'Q') {
+    Direction dir = Direction::None;
+    switch (std::toupper(input)) {
+    case 'W': dir = Direction::Up; break;
+    case 'S': dir = Direction::Down; break;
+    case 'A': dir = Direction::Left; break;
+    case 'D': dir = Direction::Right; break;
+    case 'Q':
         gameOver = true;
         return;
+    default: break;
     }
 
-    bool moved = hero.move(input, map);
+    hero->move(dir, map);
 
     if (input == ' ' || input == '\r') {
-        int dx = abs(hero.getX() - enemy.getX());
-        int dy = abs(hero.getY() - enemy.getY());
-        if (dx <= 1 && dy <= 1 && enemy.isAlive()) {
+        int dx = abs(hero->getX() - enemy->getX());
+        int dy = abs(hero->getY() - enemy->getY());
+        if (dx <= 1 && dy <= 1 && enemy->isAlive()) {
             cout << "\nHero attacks enemy!\n";
-            enemy.takeDamage();
-            _getch();
+            enemy->takeDamage();
+            (void)_getch();
         }
     }
 
-    if (!enemy.isAlive()) {
+    if (!enemy->isAlive()) {
         cout << "\nEnemy defeated! You win!\n";
         gameOver = true;
     }
-
 }
 
 bool GameManager::isRunning() const {
