@@ -11,12 +11,15 @@ private:
     int maxHealth;
     int attackRange;
     int x, y;
-    Move moveController; 
+    Move moveController;
+    Map* world;
 
 public:
     Hero();
 
     Hero(string n, int hp, int range, int startX, int startY);
+
+    void setMap(Map* mapNew) { world = mapNew; }
 
     bool move(Direction dir, const Map& map);
 
