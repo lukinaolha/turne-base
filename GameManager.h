@@ -6,8 +6,8 @@
 class GameManager {
 private:
     Map map;
-    Hero hero;
-    Enemy enemy;
+    Hero* hero;
+    Enemy* enemy;
     bool gameOver;
 
 public:
