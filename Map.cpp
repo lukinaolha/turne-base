@@ -34,12 +34,23 @@ bool Map::canEnter(int x, int y) const {
     return isInside(x, y) && grid[y][x].isWalkable;
 }
 
-void Map::show(int heroX, int heroY, int enemyX, int enemyY) const {
+void Map::show(int heroX, int heroY, const vector<Enemy*>& enemies) const {
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            if (x == heroX && y == heroY) cout << 'H';
-            else if (x == enemyX && y == enemyY) cout << 'E';
-            else cout << grid[y][x].symbol;
+            bool isEnemy = false;
+            for (Enemy* e : enemies) {
+                if (e && e->isAlive() && e->getX() == x && e->getY() == y) {
+                    cout << 'E';
+                    isEnemy = true;
+                    break;
+                }
+            }
+            if (!isEnemy) {
+                if (x == heroX && y == heroY)
+                    cout << 'H';
+                else
+                    cout << grid[y][x].symbol;
+            }
         }
         cout << '\n';
     }
