@@ -7,15 +7,15 @@ using namespace std;
 class GameManager {
 private:
     Map map;
-    Hero* hero;
-    vector<Enemy*> enemies;  
+    Hero& hero;
+    vector<Enemy*> enemies;
     bool gameOver;
 
 public:
-    GameManager(int width = 10, int height = 10);
+    GameManager(int width, int height, Hero& heroRef);
 
-    void init();      
-    void render();   
-    void update();    
+    void init();
+    void render();
+    void update();
     bool isRunning() const;
 };
