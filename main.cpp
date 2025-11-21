@@ -3,7 +3,7 @@
 #include <ctime>
 
 int main() {
-    srand(time(0));
+    srand((unsigned int)time(nullptr));
 
     int hx = rand() % 10;
     int hy = rand() % 10;
@@ -17,7 +17,5 @@ int main() {
         game.render();
         game.update();
     }
-
-    cout << "\nGame Over!\n";
     return 0;
 }

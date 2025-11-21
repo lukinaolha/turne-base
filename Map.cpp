@@ -1,29 +1,37 @@
 ﻿#include "Map.h"
-#include "hero.h"
 #include "enemy.h"
+#include <iostream>
 #include <cstdlib>
-#include <ctime>
+using namespace std;
 
-Map::Map(int w, int h) : width(w), height(h) {
-    grid.resize(height, vector<Cell>(width));
-    srand((unsigned)time(0));
+Map::Map(int w, int h) : width(w), height(h)
+{
+    grid = new Cell * [height];
+    for (int y = 0; y < height; ++y)
+        grid[y] = new Cell[width];
 }
 
-void Map::generate(int heroX, int heroY, int enemyX, int enemyY) {
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+Map::~Map()
+{
+    for (int y = 0; y < height; ++y)
+        delete[] grid[y];
+    delete[] grid;
+}
 
-            if ((x == heroX && y == heroY) || (x == enemyX && y == enemyY)) {
-                grid[y][x] = Cell('.', true, "floor");
-                continue;
-            }
-
+void Map::generate(int hx, int hy, int ex, int ey)
+{
+    for (int y = 0; y < height; ++y)
+        for (int x = 0; x < width; ++x)
+        {
             if (rand() % 10 == 0)
                 grid[y][x] = Cell('#', false, "wall");
             else
                 grid[y][x] = Cell('.', true, "floor");
         }
-    }
+
+    grid[hy][hx] = Cell('.', true, "floor");
+    if (ex >= 0 && ey >= 0)
+        grid[ey][ex] = Cell('.', true, "floor");
 }
 
 bool Map::isInside(int x, int y) const {
@@ -34,24 +42,28 @@ bool Map::canEnter(int x, int y) const {
     return isInside(x, y) && grid[y][x].isWalkable;
 }
 
-void Map::show(int heroX, int heroY, const vector<Enemy*>& enemies) const {
+void Map::show(int heroX, int heroY, const vector<Enemy*>& enemies) const
+{
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            bool isEnemy = false;
-            for (Enemy* e : enemies) {
-                if (e && e->isAlive() && e->getX() == x && e->getY() == y) {
+
+            bool printed = false;
+
+            if (x == heroX && y == heroY) {
+                cout << 'H';
+                printed = true;
+            }
+
+            for (auto e : enemies) {
+                if (!printed && e->isAlive() && x == e->getX() && y == e->getY()) {
                     cout << 'E';
-                    isEnemy = true;
-                    break;
+                    printed = true;
                 }
             }
-            if (!isEnemy) {
-                if (x == heroX && y == heroY)
-                    cout << 'H';
-                else
-                    cout << grid[y][x].symbol;
-            }
+
+            if (!printed)
+                cout << grid[y][x].symbol;
         }
-        cout << '\n';
+        cout << "\n";
     }
 }
