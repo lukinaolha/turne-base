@@ -58,6 +58,9 @@ void GameManager::update()
     }
 
     hero.move(dir, map);
+    for (Enemy* enemy : enemies) {
+        enemy->updateAI(hero.getX(), hero.getY(), map);
+    }
 
     if (input == ' ' || input == '\r') {
 
