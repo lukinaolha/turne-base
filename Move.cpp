@@ -1,8 +1,9 @@
 #include "Move.h"
+#include "enemy.h"
 
 Move::Move(int& rx, int& ry) : x(rx), y(ry) {}
 
-bool Move::move(Direction dir, const Map& map) {
+bool Move::move(Direction dir, const Map& map, const vector<Enemy*>& enemies) {
     int nx = x;
     int ny = y;
 
@@ -16,6 +17,13 @@ bool Move::move(Direction dir, const Map& map) {
 
     if (!map.isInside(nx, ny)) return false;
     if (!map.canEnter(nx, ny)) return false;
+
+
+    for (auto e : enemies) {
+        if (e->isAlive() && e->getX() == nx && e->getY() == ny) {
+            return false;
+        }
+    }
 
     x = nx;
     y = ny;

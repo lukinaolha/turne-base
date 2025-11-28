@@ -1,6 +1,8 @@
 #pragma once
 #include "Map.h"
 
+class Enemy;
+
 enum class Direction {
     Up,
     Down,
@@ -14,7 +16,8 @@ private:
     int& x, & y;
 
 public:
-    Move(int& rx, int& ry); 
+    Move(int& rx, int& ry);
 
-    bool move(Direction dir, const Map& map);
+    bool move(Direction dir, const Map& map, const vector<Enemy*>& enemies);
+
 };
