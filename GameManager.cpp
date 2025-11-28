@@ -3,6 +3,9 @@
 #include <conio.h>
 #include <cstdlib>
 #include <ctime>
+#include <algorithm>
+#include <fstream>
+#include <vector>
 using namespace std;
 
 GameManager::GameManager(int width, int height, Hero& heroRef)
@@ -144,6 +147,30 @@ void GameManager::update() {
     int oldHeroX = hero.getX();
     int oldHeroY = hero.getY();
 
+    if (toupper(input) == 'F') {
+        Enemy* e = findNearestEnemy();
+        if (e)
+            cout << "Nearest enemy: " << e->getSymbol()
+            << " at (" << e->getX() << "," << e->getY() << ")\n";
+        return;
+    }
+
+    if (toupper(input) == 'T') {
+        sortEnemies();
+        cout << "Enemies sorted by distance.\n";
+        return;
+    }
+
+    if (toupper(input) == 'K') {
+        saveGame();
+        return;
+    }
+
+    if (toupper(input) == 'L') {
+        loadGame();
+        return;
+    }
+
     hero.move(dir, *map, enemies);
 
     if (input == ' ' || input == '\r') {
@@ -213,4 +240,85 @@ void GameManager::update() {
 
 bool GameManager::isRunning() const {
     return !gameOver;
+}
+
+Enemy* GameManager::findNearestEnemy() {
+    Enemy* best = nullptr;
+    int bestDist = 999999;
+
+    for (auto e : enemies) {
+        if (!e->isAlive()) continue;
+
+        int dx = abs(hero.getX() - e->getX());
+        int dy = abs(hero.getY() - e->getY());
+        int dist = dx + dy;
+
+        if (dist < bestDist) {
+            bestDist = dist;
+            best = e;
+        }
+    }
+
+    return best;
+}
+
+void GameManager::sortEnemies() {
+    sort(enemies.begin(), enemies.end(),
+        [&](Enemy* a, Enemy* b) {
+            int da = abs(hero.getX() - a->getX()) + abs(hero.getY() - a->getY());
+            int db = abs(hero.getX() - b->getX()) + abs(hero.getY() - b->getY());
+            return da < db;
+        }
+    );
+}
+
+void GameManager::saveGame() {
+    ofstream file("save.txt");
+
+    file << hero.getX() << " " << hero.getY() << "\n";
+    file << enemies.size() << "\n";
+
+    for (auto e : enemies) {
+        file << e->getSymbol() << " "
+            << e->getX() << " "
+            << e->getY() << " "
+            << e->isAlive() << "\n";
+    }
+
+    cout << "Game saved!\n";
+}
+
+void GameManager::loadGame() {
+    ifstream file("save.txt");
+    if (!file.is_open()) {
+        cout << "No save file found!\n";
+        return;
+    }
+
+    enemies.clear();
+
+    int hx, hy;
+    file >> hx >> hy;
+    hero.setPosition(hx, hy);
+
+    int count;
+    file >> count;
+
+    for (int i = 0; i < count; i++) {
+        char type;
+        int x, y, alive;
+        file >> type >> x >> y >> alive;
+
+        Enemy* e = nullptr;
+
+        if (type == 'G') e = new Goblin(x, y);
+        else if (type == 'O') e = new Orc(x, y);
+        else if (type == 'Z') e = new Zombie(x, y);
+
+        if (!alive) e->takeDamage();
+
+        enemies.push_back(e);
+    }
+
+    cout << "Game loaded!\n";
 }

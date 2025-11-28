@@ -32,5 +32,10 @@ public:
     void init();   
     void render();   
     void update();  
-    bool isRunning() const;  
+    bool isRunning() const;
+
+    Enemy* findNearestEnemy();
+    void sortEnemies();
+    void saveGame();
+    void loadGame();
 };
