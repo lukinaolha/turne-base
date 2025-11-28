@@ -37,7 +37,6 @@ public:
         int chestX, int chestY,
         bool chestOpened) const;
 
-    // NEW:
     void setStairs(int x, int y);
     void showStairs(bool visible);
     bool isStairsHere(int x, int y) const;

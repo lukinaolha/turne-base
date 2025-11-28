@@ -1,14 +1,19 @@
 #include "enemy.h" 
+#include "hero.h"
 #include <iostream>
 #include <cstdlib>
 using namespace std;
 
 Enemy::Enemy(string n, int startX, int startY)
-    : name(n), health(1), x(startX), y(startY) {
+    : Entity(startX, startY),  
+    name(n),
+    health(1)
+{
 }
 
 void Enemy::moveTowards(int heroX, int heroY, const Map& map) {
     if (!isAlive()) return;
+
     int dx = heroX - x;
     int dy = heroY - y;
 
@@ -86,4 +91,41 @@ void Enemy::takeDamage() {
 
 bool Enemy::isAlive() const {
     return health > 0;
+}
+void Goblin::updateAI(int heroX, int heroY, const Map& map) {
+    if (!isAlive()) return;
+
+    // Гоблін завжди просто йде до героя (без випадкового блудіння)
+    moveTowards(heroX, heroY, map);
+}
+
+// ======= Orc =======
+void Orc::updateAI(int heroX, int heroY, const Map& map) {
+    if (!isAlive()) return;
+
+    // Орк рухається через хід
+    if (moveCooldown == 0) {
+        moveTowards(heroX, heroY, map);
+        moveCooldown = 1;
+    }
+    else {
+        moveCooldown = 0; // цей хід стоїть
+    }
+}
+
+void Orc::attackHero(Hero& hero) {
+    if (!isAlive()) return;
+    // Орк б'є сильніше за базового ворога
+    hero.takeDamage(1);
+}
+
+// ======= Zombie =======
+void Zombie::updateAI(int heroX, int heroY, const Map& map) {
+    if (!isAlive()) return;
+
+    // 50% — використовує базовий AI (рандом/агро), 50% — стоїть
+    if (rand() % 100 < 50) {
+        Enemy::updateAI(heroX, heroY, map);
+    }
+    // інакше зомбі просто стоїть
 }

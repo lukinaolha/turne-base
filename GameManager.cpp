@@ -45,7 +45,17 @@ void GameManager::spawnEnemies() {
         } while (!map->canEnter(ex, ey) ||
             (ex == hero.getX() && ey == hero.getY()));
 
-        enemies.push_back(new Enemy("Goblin", ex, ey));
+        int type = rand() % 3;
+
+        if (type == 0) {
+            enemies.push_back(new Goblin(ex, ey));
+        }
+        else if (type == 1) {
+            enemies.push_back(new Orc(ex, ey));
+        }
+        else {
+            enemies.push_back(new Zombie(ex, ey));
+        }
     }
 }
 

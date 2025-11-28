@@ -35,7 +35,6 @@ void Map::generate(int hx, int hy, int ex, int ey)
     if (ex >= 0 && ey >= 0)
         grid[ey][ex] = Cell('.', true, "floor");
 
-    // Reset stairs visibility on new map
     stairsVisible = false;
 }
 
@@ -80,10 +79,12 @@ void Map::show(int heroX, int heroY,
             }
 
             for (auto e : enemies) {
-                if (!printed && e->isAlive() &&
-                    x == e->getX() && y == e->getY())
+                if (!printed &&
+                    e->isAlive() &&
+                    x == e->getX() &&
+                    y == e->getY())
                 {
-                    cout << 'E';
+                    cout << e->getSymbol();   // ← ПРАВИЛЬНО
                     printed = true;
                 }
             }
@@ -95,7 +96,6 @@ void Map::show(int heroX, int heroY,
                 printed = true;
             }
 
-            // NEW: stairs
             if (!printed && stairsVisible &&
                 x == stairsX && y == stairsY)
             {
