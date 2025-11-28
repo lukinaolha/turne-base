@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include "Map.h"
 #include "Move.h"
+
 using namespace std;
 
 class Hero {
@@ -10,21 +11,47 @@ private:
     int health;
     int maxHealth;
     int attackRange;
+    int attack;
+
     int x, y;
     Move moveController;
     Map* world;
 
 public:
     Hero();
-
     Hero(string n, int hp, int range, int startX, int startY);
 
     void setMap(Map* mapNew) { world = mapNew; }
 
     bool move(Direction dir, const Map& map);
-
     void drawStatus() const;
 
     int getX() const { return x; }
     int getY() const { return y; }
+
+    void setPosition(int newX, int newY) { x = newX; y = newY; }
+
+    void clampToMap(const Map& map) {
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (x >= map.getWidth())  x = map.getWidth() - 1;
+        if (y >= map.getHeight()) y = map.getHeight() - 1;
+    }
+
+    void heal(int amount) {
+        health += amount;
+        if (health > maxHealth)
+            health = maxHealth;
+    }
+
+    void increaseAttack(int amount) {
+        attack += amount;
+    }
+
+    void increaseRange(int amount) {
+        attackRange += amount;
+    }
+
+    int getAttack() const { return attack; }
+    int getAttackRange() const { return attackRange; }
 };

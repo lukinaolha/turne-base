@@ -1,51 +1,115 @@
 ﻿#include "GameManager.h"
-#include "Move.h"
 #include <iostream>
 #include <conio.h>
 #include <cstdlib>
-#include <ctime>
 using namespace std;
 
 GameManager::GameManager(int width, int height, Hero& heroRef)
-    : map(width, height),
+    : map(nullptr),
     hero(heroRef),
-    gameOver(false)
+    chest(nullptr),
+    gameOver(false),
+    baseW(width),
+    baseH(height)
 {
-    srand((unsigned)time(0));
+    map = new Map(width, height);
 }
 
-void GameManager::init()
-{
-    map.generate(hero.getX(), hero.getY(), -1, -1);
+GameManager::~GameManager() {
+    delete map;
+    for (auto e : enemies) delete e;
+    delete chest;
+}
 
-    int ex, ey;
+void GameManager::spawnEnemies() {
+    for (auto e : enemies) delete e;
+    enemies.clear();
 
-    for (int i = 0; i < 3; ++i) {
+    int count = 3; // постійно 3 вороги
 
+    for (int i = 0; i < count; ++i) {
+        int ex, ey;
         do {
-            ex = rand() % 10;
-            ey = rand() % 10;
-        } while (!map.canEnter(ex, ey) ||
+            ex = rand() % map->getWidth();
+            ey = rand() % map->getHeight();
+        } while (!map->canEnter(ex, ey) ||
             (ex == hero.getX() && ey == hero.getY()));
 
         enemies.push_back(new Enemy("Goblin", ex, ey));
     }
+}
 
-    hero.setMap(&map);
+void GameManager::spawnChest() {
+    int cx, cy;
+    do {
+        cx = rand() % map->getWidth();
+        cy = rand() % map->getHeight();
+    } while (!map->canEnter(cx, cy) ||
+        (cx == hero.getX() && cy == hero.getY()));
 
+    if (chest) delete chest;
+    chest = new Chest(cx, cy);
+}
+
+void GameManager::regenerateLevel() {
+    // Невелика зміна розміру карти в межах [8;12]
+    int newW = baseW + (rand() % 3 - 1); // baseW-1 .. baseW+1
+    int newH = baseH + (rand() % 3 - 1);
+
+    if (newW < 8) newW = 8;
+    if (newW > 12) newW = 12;
+    if (newH < 8) newH = 8;
+    if (newH > 12) newH = 12;
+
+    delete map;
+    map = new Map(newW, newH);
+
+    // гарантуємо, що герой всередині меж перед generate
+    hero.clampToMap(*map);
+
+    map->generate(hero.getX(), hero.getY(), -1, -1);
+
+    spawnEnemies();
+    spawnChest();
+
+    int sx, sy;
+    do {
+        sx = rand() % map->getWidth();
+        sy = rand() % map->getHeight();
+    } while (!map->canEnter(sx, sy) ||
+        (sx == hero.getX() && sy == hero.getY()));
+
+    map->setStairs(sx, sy);
+    map->showStairs(false);
+
+    hero.setMap(map);
+}
+
+void GameManager::init() {
+    regenerateLevel();
 }
 
 void GameManager::render() {
     system("cls");
 
-    map.show(hero.getX(), hero.getY(), enemies);
+    cout << "LEVEL: " << level
+        << "    MAP: " << map->getWidth()
+        << "x" << map->getHeight() << "\n";
+
+    map->show(
+        hero.getX(),
+        hero.getY(),
+        enemies,
+        chest->getX(),
+        chest->getY(),
+        chest->isOpened()
+    );
+
     hero.drawStatus();
 }
 
-void GameManager::update()
-{
+void GameManager::update() {
     char input = _getch();
-
     Direction dir = Direction::None;
 
     switch (toupper(input)) {
@@ -57,17 +121,25 @@ void GameManager::update()
     default: break;
     }
 
-    hero.move(dir, map);
-    for (Enemy* enemy : enemies) {
-        enemy->updateAI(hero.getX(), hero.getY(), map);
+    hero.move(dir, *map);
+
+    if (chest &&
+        !chest->isOpened() &&
+        hero.getX() == chest->getX() &&
+        hero.getY() == chest->getY())
+    {
+        string bonus = chest->open();
+
+        if (bonus == "heal")   hero.heal(1);
+        else if (bonus == "attack") hero.increaseAttack(1);
+        else if (bonus == "range")  hero.increaseRange(1);
+
     }
 
     if (input == ' ' || input == '\r') {
-
         for (Enemy* enemy : enemies) {
             int dx = abs(hero.getX() - enemy->getX());
             int dy = abs(hero.getY() - enemy->getY());
-
             if (dx <= 1 && dy <= 1 && enemy->isAlive()) {
                 enemy->takeDamage();
                 break;
@@ -76,15 +148,19 @@ void GameManager::update()
     }
 
     bool allDead = true;
-    for (Enemy* e : enemies) {
-        if (e->isAlive()) {
-            allDead = false;
-            break;
-        }
-    }
+    for (Enemy* e : enemies)
+        if (e->isAlive()) { allDead = false; break; }
 
     if (allDead)
-        gameOver = true;
+        map->showStairs(true);
+
+    if (map->stairsAreVisible() &&
+        hero.getX() == map->getStairsX() &&
+        hero.getY() == map->getStairsY())
+    {
+        level++;
+        regenerateLevel();
+    }
 }
 
 bool GameManager::isRunning() const {

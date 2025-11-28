@@ -3,15 +3,29 @@
 using namespace std;
 
 Hero::Hero()
-    : name("User"), health(3), maxHealth(3),
-    attackRange(1), x(0), y(0),
-    moveController(x, y) {
+    : name("User"),
+    health(3),
+    maxHealth(3),
+    attackRange(1),
+    attack(1),
+    x(0),
+    y(0),
+    moveController(x, y),
+    world(nullptr)
+{
 }
 
 Hero::Hero(string n, int hp, int range, int startX, int startY)
-    : name(n), health(hp), maxHealth(hp),
-    attackRange(range), x(startX), y(startY),
-    moveController(x, y) {
+    : name(n),
+    health(hp),
+    maxHealth(hp),
+    attackRange(range),
+    attack(1),
+    x(startX),
+    y(startY),
+    moveController(x, y),
+    world(nullptr)
+{
 }
 
 bool Hero::move(Direction dir, const Map& map) {
@@ -20,5 +34,6 @@ bool Hero::move(Direction dir, const Map& map) {
 
 void Hero::drawStatus() const {
     cout << "HP: " << health << "/" << maxHealth
-        << "   RANGE: " << attackRange;
+        << "   RANGE: " << attackRange
+        << "   ATK: " << attack;
 }
