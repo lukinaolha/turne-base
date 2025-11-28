@@ -2,6 +2,7 @@
 #include <iostream>
 #include <conio.h>
 #include <cstdlib>
+#include <ctime>
 using namespace std;
 
 GameManager::GameManager(int width, int height, Hero& heroRef)
@@ -12,6 +13,7 @@ GameManager::GameManager(int width, int height, Hero& heroRef)
     baseW(width),
     baseH(height)
 {
+    srand((unsigned)time(0));
     map = new Map(width, height);
 }
 
@@ -21,14 +23,22 @@ GameManager::~GameManager() {
     delete chest;
 }
 
+bool GameManager::isEnemyAt(int x, int y) const {
+    for (auto e : enemies)
+        if (e->isAlive() && e->getX() == x && e->getY() == y)
+            return true;
+    return false;
+}
+
 void GameManager::spawnEnemies() {
     for (auto e : enemies) delete e;
     enemies.clear();
 
-    int count = 3; // постійно 3 вороги
+    int count = 3;
 
     for (int i = 0; i < count; ++i) {
         int ex, ey;
+
         do {
             ex = rand() % map->getWidth();
             ey = rand() % map->getHeight();
@@ -41,6 +51,7 @@ void GameManager::spawnEnemies() {
 
 void GameManager::spawnChest() {
     int cx, cy;
+
     do {
         cx = rand() % map->getWidth();
         cy = rand() % map->getHeight();
@@ -52,8 +63,8 @@ void GameManager::spawnChest() {
 }
 
 void GameManager::regenerateLevel() {
-    // Невелика зміна розміру карти в межах [8;12]
-    int newW = baseW + (rand() % 3 - 1); // baseW-1 .. baseW+1
+  
+    int newW = baseW + (rand() % 3 - 1);
     int newH = baseH + (rand() % 3 - 1);
 
     if (newW < 8) newW = 8;
@@ -64,7 +75,6 @@ void GameManager::regenerateLevel() {
     delete map;
     map = new Map(newW, newH);
 
-    // гарантуємо, що герой всередині меж перед generate
     hero.clampToMap(*map);
 
     map->generate(hero.getX(), hero.getY(), -1, -1);
@@ -121,7 +131,24 @@ void GameManager::update() {
     default: break;
     }
 
-    hero.move(dir, *map);
+    int oldHeroX = hero.getX();
+    int oldHeroY = hero.getY();
+
+    hero.move(dir, *map, enemies);
+
+    if (input == ' ' || input == '\r') {
+        for (Enemy* enemy : enemies) {
+            if (!enemy->isAlive()) continue;
+
+            int dx = abs(oldHeroX - enemy->getX());
+            int dy = abs(oldHeroY - enemy->getY());
+
+            if (dx + dy == 1) {
+                enemy->takeDamage();
+                break;
+            }
+        }
+    }
 
     if (chest &&
         !chest->isOpened() &&
@@ -130,19 +157,30 @@ void GameManager::update() {
     {
         string bonus = chest->open();
 
-        if (bonus == "heal")   hero.heal(1);
+        if (bonus == "heal")        hero.heal(1);
         else if (bonus == "attack") hero.increaseAttack(1);
         else if (bonus == "range")  hero.increaseRange(1);
-
     }
 
-    if (input == ' ' || input == '\r') {
-        for (Enemy* enemy : enemies) {
-            int dx = abs(hero.getX() - enemy->getX());
-            int dy = abs(hero.getY() - enemy->getY());
-            if (dx <= 1 && dy <= 1 && enemy->isAlive()) {
-                enemy->takeDamage();
-                break;
+ 
+    for (Enemy* enemy : enemies) {
+
+        if (!enemy->isAlive()) continue;
+
+        int oldX = enemy->getX();
+        int oldY = enemy->getY();
+
+        enemy->updateAI(hero.getX(), hero.getY(), *map);
+
+        int dx = abs(hero.getX() - oldX);
+        int dy = abs(hero.getY() - oldY);
+
+        if (enemy->isAlive() && dx + dy == 1) {
+            enemy->attackHero(hero);
+
+            if (!hero.isAlive()) {
+                gameOver = true;
+                return;
             }
         }
     }

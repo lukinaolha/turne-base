@@ -1,8 +1,10 @@
-﻿#pragma once
+#pragma once
 #include <string>
-#include "Map.h"
+#include <vector>
 #include "Move.h"
+#include "Map.h"
 
+class Enemy;
 using namespace std;
 
 class Hero {
@@ -10,6 +12,7 @@ private:
     string name;
     int health;
     int maxHealth;
+
     int attackRange;
     int attack;
 
@@ -23,7 +26,15 @@ public:
 
     void setMap(Map* mapNew) { world = mapNew; }
 
-    bool move(Direction dir, const Map& map);
+    bool move(Direction dir, const Map& map, const vector<Enemy*>& enemies);
+
+    void takeDamage(int dmg) {
+        health -= dmg;
+        if (health < 0) health = 0;
+    }
+
+    bool isAlive() const { return health > 0; }
+
     void drawStatus() const;
 
     int getX() const { return x; }

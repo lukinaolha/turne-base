@@ -1,7 +1,10 @@
 #pragma once
 #include <string>
+#include "hero.h"  
 #include "Map.h"
 using namespace std;
+
+class Hero;
 
 class Enemy {
 private:
@@ -11,6 +14,7 @@ private:
     int aggroRange = 4;
 
 
+
 public:
     Enemy(string n = "Goblin", int startX = 5, int startY = 2);
 
@@ -18,6 +22,7 @@ public:
     void updateAI(int heroX, int heroY, const Map& map);
     void takeDamage();
     bool isAlive() const;        
+    void attackHero(Hero& hero);
 
     int getX() const { return x; }
     int getY() const { return y; }

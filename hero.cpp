@@ -28,8 +28,8 @@ Hero::Hero(string n, int hp, int range, int startX, int startY)
 {
 }
 
-bool Hero::move(Direction dir, const Map& map) {
-    return moveController.move(dir, map);
+bool Hero::move(Direction dir, const Map& map, const vector<Enemy*>& enemies) {
+    return moveController.move(dir, map, enemies);
 }
 
 void Hero::drawStatus() const {

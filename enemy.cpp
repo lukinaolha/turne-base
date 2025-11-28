@@ -1,4 +1,4 @@
-#include "enemy.h"
+#include "enemy.h" 
 #include <iostream>
 #include <cstdlib>
 using namespace std;
@@ -9,20 +9,32 @@ Enemy::Enemy(string n, int startX, int startY)
 
 void Enemy::moveTowards(int heroX, int heroY, const Map& map) {
     if (!isAlive()) return;
+    int dx = heroX - x;
+    int dy = heroY - y;
 
-    int dx = 0;
-    int dy = 0;
+    int nx = x;
+    int ny = y;
 
-    if (heroX > x) dx = 1;
-    else if (heroX < x) dx = -1;
+    if (abs(dx) > abs(dy)) {
+        nx += (dx > 0 ? 1 : -1);
+    }
 
-    if (heroY > y) dy = 1;
-    else if (heroY < y) dy = -1;
+    else if (abs(dy) > abs(dx)) {
+        ny += (dy > 0 ? 1 : -1);
+    }
 
-    int nx = x + dx;
-    int ny = y + dy;
+    else {
+        if (rand() % 2 == 0)
+            nx += (dx > 0 ? 1 : -1);
+        else
+            ny += (dy > 0 ? 1 : -1);
+    }
 
     if (map.isInside(nx, ny) && map.canEnter(nx, ny)) {
+
+        if (nx == heroX && ny == heroY)
+            return;
+
         x = nx;
         y = ny;
     }
@@ -49,6 +61,10 @@ void Enemy::updateAI(int heroX, int heroY, const Map& map) {
         }
 
         if (map.isInside(nx, ny) && map.canEnter(nx, ny)) {
+
+            if (nx == heroX && ny == heroY)
+                return;
+
             x = nx;
             y = ny;
         }
@@ -56,6 +72,12 @@ void Enemy::updateAI(int heroX, int heroY, const Map& map) {
     }
 
     moveTowards(heroX, heroY, map);
+}
+
+void Enemy::attackHero(Hero& hero) {
+    if (!isAlive()) return;
+
+    hero.takeDamage(1); 
 }
 
 void Enemy::takeDamage() {
