@@ -1,4 +1,7 @@
 ﻿#include "GameManager.h"
+#include "AttackBuff.h"
+#include "RangeBuff.h"
+#include "HealthBuff.h"
 #include <iostream>
 #include <conio.h>
 #include <cstdlib>
@@ -194,9 +197,12 @@ void GameManager::update() {
     {
         string bonus = chest->open();
 
-        if (bonus == "heal")        hero.heal(1);
-        else if (bonus == "attack") hero.increaseAttack(1);
-        else if (bonus == "range")  hero.increaseRange(1);
+        if (bonus == "heal")
+            hero.addBuff(new HealthBuff());
+        else if (bonus == "attack")
+            hero.addBuff(new AttackBuff());
+        else if (bonus == "range")
+            hero.addBuff(new RangeBuff());
     }
 
  

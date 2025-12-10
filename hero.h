@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "Buff.h"
 #include "Move.h"
 #include "Map.h"
 
@@ -19,6 +20,8 @@ private:
     int x, y;
     Move moveController;
     Map* world;
+
+    vector<Buff*> buffs;
 
 public:
     Hero();
@@ -65,4 +68,26 @@ public:
 
     int getAttack() const { return attack; }
     int getAttackRange() const { return attackRange; }
+
+    void addBuff(Buff* b) {
+        buffs.push_back(b);
+    }
+
+    int getTotalAttack() const {
+        int bonus = 0;
+        for (auto b : buffs) bonus += b->addAttack();
+        return attack + bonus;
+    }
+
+    int getTotalRange() const {
+        int bonus = 0;
+        for (auto b : buffs) bonus += b->addRange();
+        return attackRange + bonus;
+    }
+
+    int getTotalHealth() const {
+        int bonus = 0;
+        for (auto b : buffs) bonus += b->addHealth();
+        return health + bonus;
+    }
 };
