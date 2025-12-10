@@ -1,4 +1,5 @@
 #pragma once
+#include "EnemyFactory.h"
 #include "Map.h"
 #include "hero.h"
 #include "enemy.h"

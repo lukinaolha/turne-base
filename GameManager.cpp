@@ -1,7 +1,7 @@
 ﻿#include "GameManager.h"
 #include "AttackBuff.h"
+#include "HealthBuff.h" 
 #include "RangeBuff.h"
-#include "HealthBuff.h"
 #include <iostream>
 #include <conio.h>
 #include <cstdlib>
@@ -51,17 +51,8 @@ void GameManager::spawnEnemies() {
         } while (!map->canEnter(ex, ey) ||
             (ex == hero.getX() && ey == hero.getY()));
 
-        int type = rand() % 3;
-
-        if (type == 0) {
-            enemies.push_back(new Goblin(ex, ey));
-        }
-        else if (type == 1) {
-            enemies.push_back(new Orc(ex, ey));
-        }
-        else {
-            enemies.push_back(new Zombie(ex, ey));
-        }
+        Enemy* e = EnemyFactory::createRandomEnemy(ex, ey);
+        enemies.push_back(e);
     }
 }
 
@@ -205,6 +196,7 @@ void GameManager::update() {
             hero.addBuff(new RangeBuff());
     }
 
+
  
     for (Enemy* enemy : enemies) {
 
@@ -317,9 +309,9 @@ void GameManager::loadGame() {
 
         Enemy* e = nullptr;
 
-        if (type == 'G') e = new Goblin(x, y);
-        else if (type == 'O') e = new Orc(x, y);
-        else if (type == 'Z') e = new Zombie(x, y);
+        if (type == 'G') e = EnemyFactory::createEnemyByType("Goblin", x, y);
+        else if (type == 'O') e = EnemyFactory::createEnemyByType("Orc", x, y);
+        else if (type == 'Z') e = EnemyFactory::createEnemyByType("Zombie", x, y);
 
         if (!alive) e->takeDamage();
 
